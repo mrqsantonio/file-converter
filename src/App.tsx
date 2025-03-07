@@ -2,12 +2,11 @@ import "./App.css"
 
 import { useState} from "react"
 import FilePicker from "./FilePicker"
-import Converter from "./Converter"
+import OpPicker from "./OpPicker"
 
 
 export default function App() {
   const [file, setFile] = useState<File | null>(null)
-
 
   function removeFile() {
     setFile(null)
@@ -20,7 +19,7 @@ export default function App() {
             file == null ?
             <FilePicker setFile={setFile}/>
             :
-            <Converter file={file} removeFile={removeFile}/> 
+            <OpPicker file={file} removeFile={removeFile}/>
           }
       </div>
   )
