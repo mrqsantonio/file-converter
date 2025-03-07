@@ -21,8 +21,9 @@ export default function OpPicker({file, removeFile}: OpPickerProps) {
     useEffect(() => {
         if (file) {
             const converter = converters.find((converter) => { return converter.isType(file) })
+            // console.log(converter)
             if (converter) {
-                console.log(`Setting conversions list for ${Type[converter.originalType]}`)
+                // console.log(`Setting conversions list for ${Type[converter.originalType]}`)
                 setConverter(converter)
                 setConversions(converter.getConverters())
             }
@@ -42,7 +43,7 @@ export default function OpPicker({file, removeFile}: OpPickerProps) {
             <select 
                 className="mt-2 p-2 border rounded w-full" 
                 value={selectedConversion}
-                onChange={(e) => {console.log(e.target.value); setSelectedConversion(e.target.value)}}
+                onChange={(e) => {setSelectedConversion(e.target.value)}}
             >
                 <option value="">Select a conversion</option>
                 {conversions.map((conversion, index) => (

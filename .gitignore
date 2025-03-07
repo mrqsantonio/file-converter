@@ -18,6 +18,7 @@ pnpm-debug.log*
 
 # testing
 /coverage
+/test-content
 
 # production
 /build

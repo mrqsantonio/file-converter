@@ -24,7 +24,7 @@ function getConversion(type: Type): Conversion | undefined {
 }
 
 function isType(file: File): Boolean {
-    return file.name.endsWith("/\.(jpg|jpeg)$/i")
+    return file.name.match("[^\\s]+(.*?)\\.(jpg|jpeg|JPG|JPEG)$") != null
 }
 
 function getConverters(): Type[] {
