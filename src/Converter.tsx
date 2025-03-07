@@ -19,16 +19,16 @@ export default function Converter({file, removeFile}: ConverterProps) {
 
     useEffect(() => {
         if (file) {
-        const type = getFileType(file)
-        setConversions(getConversions(type))
+        // const type = getFileType(/*file*/)
+        setConversions(getConversions(/*type*/))
     }
     }, [file])
 
-    function getFileType(file: File): Type {
+    /*function getFileType(file: File): Type {
         return Type.PNG
-    }
+    }*/
 
-    function getConversions(type: Type): Type[] {
+    function getConversions(/*type: Type*/): Type[] {
         return [Type.JPG]
     }
 
