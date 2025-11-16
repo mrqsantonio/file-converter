@@ -1,5 +1,5 @@
 
-export async function deriveKey(passphrase: string, salt: Uint8Array) {
+async function deriveKey(passphrase: string, salt: Uint8Array) {
   const enc = new TextEncoder()
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
@@ -18,7 +18,7 @@ export async function deriveKey(passphrase: string, salt: Uint8Array) {
   )
 }
 
-export async function encryptChunk(chunk: Uint8Array, passphrase: string) {
+export async function encryptData(chunk: Uint8Array, passphrase: string) {
   const salt = crypto.getRandomValues(new Uint8Array(16))
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const key = await deriveKey(passphrase, salt)
@@ -29,7 +29,6 @@ export async function encryptChunk(chunk: Uint8Array, passphrase: string) {
     chunk as BufferSource
   )
 
-  // Combine salt + iv + ciphertext
   const combined = new Uint8Array(salt.length + iv.length + ciphertext.byteLength)
   combined.set(salt, 0)
   combined.set(iv, salt.length)
@@ -37,7 +36,7 @@ export async function encryptChunk(chunk: Uint8Array, passphrase: string) {
   return combined
 }
 
-export async function decryptChunk(data: Uint8Array, passphrase: string) {
+export async function decryptData(data: Uint8Array, passphrase: string) {
   const salt = data.slice(0, 16)
   const iv = data.slice(16, 28)
   const ciphertext = data.slice(28)

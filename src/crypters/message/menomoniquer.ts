@@ -1,42 +1,60 @@
-import wordlistRaw from './wordlist.txt?raw'
+/* Local libraries */
+import descriptorsRaw from './descriptors-wl.txt?raw'
+import nounsRaw from './nouns-wl.txt?raw'
 
-export const wordlist: string[] = wordlistRaw.split('\n').map(w => w.trim()).filter(Boolean)
+// 6 characters per byte on average
+export const descriptors = descriptorsRaw.split('\n').map(w => w.trim()).filter(Boolean)
+export const nouns = nounsRaw.split('\n').map(w => w.trim()).filter(Boolean)
 
-export function bytesToMnemonic(bytes: Uint8Array): string {
-  let bits = ''
-  for (const b of bytes) {
-    bits += b.toString(2).padStart(8, '0')
-  }
+export function bytesToMnemonic(bytes: Uint8Array): string[] {
+  if (descriptors.length !== 256) throw new Error('descriptors must have 256 words')
+  if (nouns.length !== 256) throw new Error('nouns must have 256 words')
 
-  // split into 11-bit chunks
-  const chunks: number[] = []
-  for (let i = 0; i < bits.length; i += 11) {
-    const chunk = bits.slice(i, i + 11).padEnd(11, '0') // pad last chunk
-    chunks.push(parseInt(chunk, 2))
-  }
+  const result: string[] = []
 
-  // map to words
-  return chunks.map(i => wordlist[i % wordlist.length]).join(' ')
-}
+  let i = 0
+  while (i < bytes.length) {
+    const b1 = bytes[i]
 
-export function mnemonicToBytes(mnemonic: string): Uint8Array {
-  const words = mnemonic.trim().split(/\s+/)
-  let bits = ''
-
-  for (const word of words) {
-    const index = wordlist.indexOf(word)
-    if (index === -1) throw new Error(`Unknown word: ${word}`)
-    bits += index.toString(2).padStart(11, '0')
-  }
-
-  // Convert bits → bytes
-  const bytes: number[] = []
-  for (let i = 0; i < bits.length; i += 8) {
-    const byteBits = bits.slice(i, i + 8)
-    if (byteBits.length === 8) {
-      bytes.push(parseInt(byteBits, 2))
+    if (i + 1 < bytes.length) {
+      const b2 = bytes[i + 1]
+      const word = `${descriptors[b1]}-${nouns[b2]}`
+      result.push(word)
+      i += 2
+    } else {
+      result.push(nouns[b1])
+      i += 1
     }
   }
 
-  return new Uint8Array(bytes)
+  return result
+}
+
+export function mnemonicToBytes(mnemonics: string[]): Uint8Array {
+  if (descriptors.length !== 256) throw new Error('descriptors must have 256 words')
+  if (nouns.length !== 256) throw new Error('nouns must have 256 words')
+
+  const result: number[] = []
+
+  for (const part of mnemonics) {
+    if (part.includes('-')) {
+      // composed word: adjective-noun
+      const [a, b] = part.split('-')
+
+      const descriptorIndex = descriptors.indexOf(a)
+      const nounIndex = nouns.indexOf(b)
+
+      if (descriptorIndex === -1) throw new Error(`Unknown word in listA: ${a}`)
+      if (nounIndex === -1) throw new Error(`Unknown word in listB: ${b}`)
+
+      result.push(descriptorIndex)
+      result.push(nounIndex)
+    } else {
+      const nounIndex = nouns.indexOf(part)
+      if (nounIndex === -1) throw new Error(`Unknown word in listB: ${part}`)
+      result.push(nounIndex)
+    }
+  }
+
+  return new Uint8Array(result)
 }
